@@ -1,0 +1,35 @@
+name: Analytics AI Weekly Digest
+
+on:
+  schedule:
+    # Wednesdays, 7am Pacific: 14:23 UTC covers PDT, 15:23 UTC covers PST.
+    # digest.py skips whichever one is not 7am Pacific.
+    - cron: "23 14 * * 3"
+    - cron: "23 15 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install feedparser beautifulsoup4 anthropic textstat
+
+      - name: Run digest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+        run: python digest.py
